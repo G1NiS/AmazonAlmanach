@@ -62,7 +62,10 @@ class KeepaClient:
         )
         response.raise_for_status()
         data = response.json()
-        product = data["products"][0]
+        products = data.get("products", [])
+        if not products:
+            raise ValueError(f"Product not found for ASIN: {asin}")
+        product = products[0]
 
         csv = product.get("csv") or []
         # csv[0] = Amazon price history (new), csv[11] = shipping cost history
@@ -104,6 +107,12 @@ class KeepaClient:
         )
         response.raise_for_status()
         return response.json().get("asinList", [])
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *args) -> None:
+        await self.close()
 
     async def close(self) -> None:
         await self._http.aclose()
