@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
 
 # Import our models so Alembic can detect them
+from core.config import settings
 from core.database import Base
 from models import Product, PriceHistory, User, Alert  # noqa: F401
 
@@ -36,7 +37,7 @@ def do_run_migrations(connection):
 
 async def run_async_migrations() -> None:
     configuration = config.get_section(config.config_ini_section, {})
-    configuration["sqlalchemy.url"] = "postgresql+asyncpg://tracker:tracker@localhost:5432/amazon_tracker"
+    configuration["sqlalchemy.url"] = settings.database_url
     connectable = async_engine_from_config(
         configuration,
         prefix="sqlalchemy.",
