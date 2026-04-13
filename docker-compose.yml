@@ -39,16 +39,16 @@ services:
       - ./backend:/app
     command: celery -A workers.tasks worker --beat --loglevel=info
 
-  frontend:
-    build: ./frontend
-    ports:
-      - "3000:3000"
-    env_file: .env
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-      - /app/.next
-    command: npm run dev
+  # frontend: (uncommented in Task 11 after Next.js scaffold)
+  #   build: ./frontend
+  #   ports:
+  #     - "3000:3000"
+  #   env_file: .env
+  #   volumes:
+  #     - ./frontend:/app
+  #     - /app/node_modules
+  #     - /app/.next
+  #   command: npm run dev
 
 volumes:
   postgres_data:
