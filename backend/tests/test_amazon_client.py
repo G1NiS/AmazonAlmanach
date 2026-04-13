@@ -1,4 +1,5 @@
 import pytest
+import httpx
 from unittest.mock import AsyncMock, MagicMock, patch
 from services.amazon_client import AmazonClient, MARKETPLACE_ENDPOINTS
 
@@ -99,3 +100,27 @@ async def test_get_item_returns_none_on_missing():
     with patch.object(client, "_post", new_callable=AsyncMock, return_value={"ItemsResult": {"Items": []}}):
         result = await client.get_item("INVALID", marketplace="US")
     assert result is None
+
+
+@pytest.mark.asyncio
+async def test_search_returns_empty_on_http_error():
+    async with AmazonClient() as client:
+        with patch.object(client, "_post", new_callable=AsyncMock, side_effect=httpx.HTTPError("error")):
+            results = await client.search("headphones", marketplace="US")
+    assert results == []
+
+
+@pytest.mark.asyncio
+async def test_get_item_returns_none_on_http_error():
+    async with AmazonClient() as client:
+        with patch.object(client, "_post", new_callable=AsyncMock, side_effect=httpx.HTTPError("error")):
+            result = await client.get_item("B08N5WRWNW", marketplace="US")
+    assert result is None
+
+
+@pytest.mark.asyncio
+async def test_async_context_manager():
+    async with AmazonClient() as client:
+        assert client._http is not None
+    # After exit, the client should be closed (aclose called)
+    assert client._http.is_closed
